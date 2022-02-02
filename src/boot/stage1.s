@@ -7,4 +7,4 @@ main:
   jmp $
 
 TIMES 510 - ($ - $$) db 0
-db 0xAA55
+dw 0xAA55

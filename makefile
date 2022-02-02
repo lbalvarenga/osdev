@@ -1,6 +1,8 @@
 # Tools
 CC = i686-elf-gcc
-CFLAGS  = -ffreestanding -O2 -Wall -Wextra -pedantic -std=c2x -ffunction-sections
+CFLAGS  = -ffreestanding -O2 -Wall -Wextra -pedantic \
+-std=c2x -ffunction-sections -I ${SRC_DIR}/${KERN_DIR}
+
 LDFLAGS = -ffreestanding -O2 -nostdlib -lgcc
 LDFILE = linker.ld
 

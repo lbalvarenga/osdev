@@ -42,8 +42,6 @@ void kprintf(char* format, ...) {
   char buf[128];
 
   for (int i = 0; format[i] != '\0'; ++i) {
-    memset(buf, 0, 128);
-
     if (format[i] == '%') {
       i++; handle_format(buf, format[i], &args);
       for (int j = 0; buf[j] != '\0'; ++j) {

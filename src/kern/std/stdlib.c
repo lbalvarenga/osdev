@@ -3,15 +3,16 @@
 #include <stdint.h>
 
 // TODO: Standardize buffer size
-void itoa(char* dest, int32_t value, uint8_t base) {
+void itoa(char* dest, uint32_t value, uint8_t base) {
   uint32_t i = 0, j = 0;
   char temp[128] = { 0 };
 
-  // TODO: implement unsigned 
-  if (value < 0) {
-    value -= 2 * value;
-    dest[j] = '-'; dest++;
-  }
+  // TODO: implement signed 
+  // for kernel operations, unsigned is more useful
+  // if (value < 0) {
+  //   value -= 2 * value;
+  //   dest[j] = '-'; dest++;
+  // }
 
   if (value == 0) {
     dest[0] = '0'; dest[1] = '\0';

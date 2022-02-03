@@ -7,12 +7,13 @@
 
 uint8_t inb(uint16_t port);
 void outb(uint16_t port, uint8_t data);
-void io_wait();
+#define io_wait() outb(0x80, 0x00)
 
 // Instructions
 
-#define cli() __asm__("cli")
-#define sti() __asm__("sti")
+#define cli()      __asm__("cli")
+#define sti()      __asm__("sti")
+#define intr(val)  __asm__("int %0"  :: "N"(val))
 #define lgdt(desc) __asm__("lgdt %0" :: "m"(*desc))
 #define lidt(desc) __asm__("lidt %0" :: "m"(*desc))
 

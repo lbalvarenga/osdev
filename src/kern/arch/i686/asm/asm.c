@@ -11,7 +11,3 @@ uint8_t inb(uint16_t port) {
 void outb(uint16_t port, uint8_t data) {
   __asm__("outb %0, %1" :: "a"(data), "Nd"(port));
 }
-
-void io_wait() {
-  outb(0x80, 0x00);
-}

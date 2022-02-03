@@ -49,7 +49,7 @@ pmode:
   mov gs, ax
 
   ; Relocate stack
-  mov esp, 0x90000
+  mov esp, 0x80000
   mov ebp, esp
 
   ; Jump to kernel entrypoint

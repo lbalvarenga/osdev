@@ -16,3 +16,7 @@ cd tools
 ```
 - make run
 - make debug
+
+## goals
+
+- self-hosting

@@ -11,7 +11,7 @@ s2_main:
   mov ah, 0x02
   mov al, 0x80 ; Plenty of room for kernel
   xor ch, ch   ; Cylinder 0
-  mov cl, 0x04 ; Sector 2..3 -> stage2; Sector 4..132 -> kernel
+  mov cl, 0x04 ; Sector 2..4 -> stage2; Sector 4..132 -> kernel
   xor dh, dh
 
   mov bx, 0x1000
@@ -49,7 +49,7 @@ pmode:
   mov gs, ax
 
   ; Relocate stack
-  mov esp, 0x80000
+  mov esp, 0x90000
   mov ebp, esp
 
   ; Jump to kernel entrypoint

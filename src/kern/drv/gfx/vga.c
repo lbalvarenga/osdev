@@ -3,17 +3,13 @@
 
 #include <stdint.h>
 
-// TODO: Implement mode checking
-#define VGA_MODE  0x03
-#define VGA_RES_X 80
-#define VGA_RES_Y 25
-
-#define VGA_REG_CTRL 0x03D4
-#define VGA_REG_DATA 0x03D5
-
+// TODO: split some functionality into a framebuffer interface
+// eg newlines and scrolling
 void vga_write(uint8_t data) {
   volatile char* video = (volatile char* ) 0xB8000;
   int pos = vga_get_cursor();
+  if (pos >= VGA_RES_X * VGA_RES_Y) pos = 0;
+
   video += pos * 2;
 
   switch (data) {

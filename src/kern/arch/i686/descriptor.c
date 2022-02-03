@@ -1,20 +1,14 @@
 #include "descriptor.h"
+#include "arch/i686/irq/isr.h"
 #include "arch/i686/asm/asm.h"
 
 #include <stdint.h>
 
-// TODO: implement interrupts wrapper with asm
-#include "std/stdio.h"
-void inthd() {
-  kprintf("INTERRUPT!");
-  while(1) {}
-}
-
 // TODO: consider return struct with gdt segments
 // This should be edited to reflect memory mapping needs
 void setup_descriptors() {
-  // TODO: place in other file and choose a proper address
-  TABLE_GDT* gdt = (TABLE_GDT* ) DESCRIPTOR_BASE;
+  // TODO: flush segment registers
+  GDT_TABLE* gdt = (GDT_TABLE* ) DESCRIPTOR_BASE;
   gdt_entry(&gdt, 0, 0, 0, 0);
 
   uintptr_t code_seg = (uintptr_t) gdt - DESCRIPTOR_BASE;
@@ -30,21 +24,17 @@ void setup_descriptors() {
   GDT_FLAG_GRAN   | GDT_FLAG_SIZE  ,  // Flags
   GDT_SEG_PRESENT | GDT_SEG_RING_0 |  // Access
   GDT_SEG_NOT_TSS | GDT_SEG_RW     ); // Access
-   
-  // TODO: Consider aligning IDT
-  TABLE_IDT* idt_base = (TABLE_IDT* ) register_gdt(gdt, DESCRIPTOR_BASE);
 
-  TABLE_IDT* idt = idt_base;
-  for (int i = 0; i < 256; ++i) {
-    idt_entry(&idt,
-    (uintptr_t) &inthd, code_seg,          // Handler, Code segment
-    IDT_ENTRY_PRESENT | IDT_ENTRY_RING_0 | // Flags
-    IDT_GATE_INT32);
-  }
+  IDT_TABLE* idt_base = (IDT_TABLE* ) register_gdt(gdt, DESCRIPTOR_BASE);
+  // Align idt_base, since GDT Descriptor is 6 bytes long
+  idt_base = (IDT_TABLE* ) ((uintptr_t) idt_base + 2);
+
+  IDT_TABLE* idt = idt_base;
+  register_isrs(&idt, code_seg);
   register_idt(idt, (uint32_t) idt_base);
 }
 
-void gdt_entry(TABLE_GDT** entry, uint32_t lim, uint32_t bas,
+void gdt_entry(GDT_TABLE** entry, uint32_t lim, uint32_t bas,
                uint16_t flags, uint8_t access) {
   (*entry)->lim_0  = (uint16_t)   lim        & 0xFFFF;
   (*entry)->bas_0  = (uint16_t)   bas        & 0xFFFF;
@@ -55,9 +45,9 @@ void gdt_entry(TABLE_GDT** entry, uint32_t lim, uint32_t bas,
   (*entry)++;
 }
 
-XDT_DESC* register_gdt(TABLE_GDT* offset, uint32_t gdt_base) {
+TABLE_DESC* register_gdt(GDT_TABLE* offset, uint32_t gdt_base) {
   uint16_t size = (uint16_t) ((uint32_t) (offset - gdt_base)) & 0xFFFF;
-  XDT_DESC* gdt_desc = (XDT_DESC* ) offset;
+  TABLE_DESC* gdt_desc = (TABLE_DESC* ) offset;
 
   gdt_desc->size   = size - 1;
   gdt_desc->offset = gdt_base;
@@ -66,7 +56,7 @@ XDT_DESC* register_gdt(TABLE_GDT* offset, uint32_t gdt_base) {
   return gdt_desc + 1;
 }
 
-void idt_entry(TABLE_IDT** entry, uint32_t isr_addr,
+void idt_entry(IDT_TABLE** entry, uint32_t isr_addr,
                uint16_t seg, uint8_t flags) {
     (*entry)->off_0    = (uint16_t) (isr_addr & 0xFFFF);
     (*entry)->off_1    = (uint16_t) ((isr_addr >> 16) & 0xFFFF);
@@ -77,9 +67,9 @@ void idt_entry(TABLE_IDT** entry, uint32_t isr_addr,
   }
 
 // TODO: DRY
-XDT_DESC* register_idt(TABLE_IDT* offset, uint32_t idt_base) {
+TABLE_DESC* register_idt(IDT_TABLE* offset, uint32_t idt_base) {
   uint16_t size = (uint16_t) ((uint32_t) (offset - idt_base)) & 0xFFFF;
-  XDT_DESC* idt_desc = (XDT_DESC* ) offset;
+  TABLE_DESC* idt_desc = (TABLE_DESC* ) offset;
 
   idt_desc->size   = size - 1;
   idt_desc->offset = idt_base;

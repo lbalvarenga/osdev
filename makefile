@@ -1,6 +1,6 @@
 # Tools
 CC = i686-elf-gcc
-CFLAGS  = -ffreestanding -O2 -Wall -Wextra -pedantic \
+CFLAGS  = -ffreestanding -Wall -Wextra -pedantic \
 -std=c2x -ffunction-sections -I ${SRC_DIR}/${KERN_DIR}
 
 LDFLAGS = -ffreestanding -O2 -nostdlib -lgcc
@@ -22,9 +22,11 @@ OBJ_DIR = ${BUILD_DIR}/obj
 
 
 # Dependency management
-KERN_TGT  = ${OBJ_DIR}/${KERN_DIR}/kern.bin
-KERN_SRCS = $(shell find ${SRC_DIR}/${KERN_DIR} -type f -name "*.c")
-KERN_OBJS = $(patsubst ${SRC_DIR}/${KERN_DIR}/%.c,${OBJ_DIR}/${KERN_DIR}/%.o,${KERN_SRCS})
+KERN_TGT    = ${OBJ_DIR}/${KERN_DIR}/kern.bin
+KERN_C_SRCS = $(shell find ${SRC_DIR}/${KERN_DIR} -type f -name "*.c")
+KERN_C_OBJS = $(patsubst ${SRC_DIR}/${KERN_DIR}/%.c,${OBJ_DIR}/${KERN_DIR}/%.o,${KERN_C_SRCS})
+KERN_S_SRCS = $(shell find ${SRC_DIR}/${KERN_DIR} -type f -name "*.s")
+KERN_S_OBJS = $(patsubst ${SRC_DIR}/${KERN_DIR}/%.s,${OBJ_DIR}/${KERN_DIR}/%.o,${KERN_S_SRCS})
 
 BOOT_SRCS = $(shell find ${SRC_DIR}/${BOOT_DIR} -type f -name "*.s")
 BOOT_DEPS = $(shell find ${SRC_DIR}/${BOOT_DIR} -type f -name "*.inc")
@@ -43,9 +45,6 @@ run: all
 debug: all
 	${QEMU} -drive format=raw,file=${TARGET} -s -S -monitor stdio
 
-dumpimg: all
-	hexdump -C ${TARGET}
-
 ${TARGET}: ${BOOT_OBJS} ${KERN_TGT}
 	cat $^ > $@
 
@@ -57,13 +56,18 @@ ${OBJ_DIR}/${BOOT_DIR}/%.o: ${SRC_DIR}/${BOOT_DIR}/%.s ${BOOT_DEPS}
 
 # Kernel ----------------------------------------------------------
 
-# Compiling
+# C source files
 ${OBJ_DIR}/${KERN_DIR}/%.o: ${SRC_DIR}/${KERN_DIR}/%.c
 	@mkdir -p $(dir $@)
 	${CC} -c $< -o $@ ${CFLAGS}
 
+# Assembly files
+${OBJ_DIR}/${KERN_DIR}/%.o: ${SRC_DIR}/${KERN_DIR}/%.s
+	@mkdir -p $(dir $@)
+	${AS} -f elf32 $< -o $@
+
 # Linking
-${KERN_TGT}: ${KERN_OBJS}
+${KERN_TGT}: ${KERN_C_OBJS} ${KERN_S_OBJS}
 	${CC} -T ${LDFILE} -o $@ $^ ${LDFLAGS}
 
 dirs:

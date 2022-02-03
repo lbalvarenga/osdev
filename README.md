@@ -15,3 +15,4 @@ cd tools
 ./build.sh
 ```
 - make run
+- make debug

@@ -17,4 +17,8 @@ void outb(uint16_t port, uint8_t data);
 #define lgdt(desc) __asm__("lgdt %0" :: "m"(*desc))
 #define lidt(desc) __asm__("lidt %0" :: "m"(*desc))
 
+// Utilities
+
+void flush_segrs(uint16_t new_seg);
+
 #endif

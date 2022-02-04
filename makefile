@@ -51,24 +51,28 @@ ${TARGET}: ${BOOT_OBJS} ${KERN_TGT}
 # Bootloader ------------------------------------------------------
 
 ${OBJ_DIR}/${BOOT_DIR}/%.o: ${SRC_DIR}/${BOOT_DIR}/%.s ${BOOT_DEPS}
+	@echo "[AS] $< -> $@"
 	@mkdir -p $(dir $@)
-	${AS} -f bin $< -o $@ -I ${SRC_DIR}/${BOOT_DIR}
+	@${AS} -f bin $< -o $@ -I ${SRC_DIR}/${BOOT_DIR}
 
 # Kernel ----------------------------------------------------------
 
 # C source files
 ${OBJ_DIR}/${KERN_DIR}/%.o: ${SRC_DIR}/${KERN_DIR}/%.c
+	@echo "[CC] $< -> $@"
 	@mkdir -p $(dir $@)
-	${CC} -c $< -o $@ ${CFLAGS}
+	@${CC} -c $< -o $@ ${CFLAGS}
 
 # Assembly files
 ${OBJ_DIR}/${KERN_DIR}/%.o: ${SRC_DIR}/${KERN_DIR}/%.s
+	@echo "[AS] $< -> $@"
 	@mkdir -p $(dir $@)
-	${AS} -f elf32 $< -o $@
+	@${AS} -f elf32 $< -o $@
 
 # Linking
 ${KERN_TGT}: ${KERN_C_OBJS} ${KERN_S_OBJS}
-	${CC} -T ${LDFILE} -o $@ $^ ${LDFLAGS}
+	@echo "[LD] ${OBJ_DIR}/* -> $@"
+	@${CC} -T ${LDFILE} -o $@ $^ ${LDFLAGS}
 
 dirs:
 	@mkdir -p ${BUILD_DIR}

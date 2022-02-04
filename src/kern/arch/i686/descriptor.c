@@ -7,7 +7,6 @@
 // TODO: consider return struct with gdt segments
 // This should be edited to reflect memory mapping needs
 void setup_descriptors() {
-  // TODO: flush segment registers
   GDT_TABLE* gdt = (GDT_TABLE* ) DESCRIPTOR_BASE;
   gdt_entry(&gdt, 0, 0, 0, 0);
 
@@ -18,12 +17,15 @@ void setup_descriptors() {
   GDT_SEG_PRESENT | GDT_SEG_RING_0 |              // Access
   GDT_SEG_NOT_TSS | GDT_SEG_EXEC   | GDT_SEG_RW); // Access
 
-  // uintptr_t data_seg = gdt - DESCRIPTOR_BASE;
+  uintptr_t data_seg = (uintptr_t) gdt - DESCRIPTOR_BASE;
   gdt_entry(&gdt,
   0x000FFFFF, 0x00000000,             // Limit, Base
   GDT_FLAG_GRAN   | GDT_FLAG_SIZE  ,  // Flags
   GDT_SEG_PRESENT | GDT_SEG_RING_0 |  // Access
   GDT_SEG_NOT_TSS | GDT_SEG_RW     ); // Access
+
+  // Replace segment registers with new data segment
+  flush_segrs((uint16_t) data_seg);
 
   IDT_TABLE* idt_base = (IDT_TABLE* ) register_gdt(gdt, DESCRIPTOR_BASE);
   // Align idt_base, since GDT Descriptor is 6 bytes long

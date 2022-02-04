@@ -35,6 +35,7 @@ static void handle_format(char dest[static 128], char mod, va_list* args) {
   }
 }
 
+// TODO: implement padding
 void kprintf(char* format, ...) {
   va_list args;
   va_start(args, format);

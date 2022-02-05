@@ -1,7 +1,7 @@
 #include "stdio.h"
 
 // TODO: make this more flexible
-#include "drv/gfx/vga.h"
+#include "drv/gfx/fbdev.h"
 #include "std/stdlib.h"
 #include "std/string.h"
 
@@ -46,11 +46,11 @@ void kprintf(char* format, ...) {
     if (format[i] == '%') {
       i++; handle_format(buf, format[i], &args);
       for (int j = 0; buf[j] != '\0'; ++j) {
-        vga_write(buf[j]);
+        fb_write(buf[j]);
       }
     }
     else {
-      vga_write(format[i]);
+      fb_write(format[i]);
     }
   }
 

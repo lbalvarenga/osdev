@@ -11,7 +11,7 @@
 #define PIC_SLAVE_DATA  0xA1
 
 // Commands
-// ICW stands for Initializzation command words
+// ICW stands for Initialization Command Words
 
 #define PIC_EOI          0x20
 #define PIC_ICW1_INIT    0x10

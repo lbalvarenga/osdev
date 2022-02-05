@@ -3,11 +3,8 @@
 
 #include <stdint.h>
 
-// TODO: make something that doesn't suck so much lol
-// Global color variable
-uint8_t* FB_COLOR = (uint8_t* ) 0x500000;
-
 void fb_init() {
+  fb_clear(0x8F);
   vga_set_cursor(0);
 }
 
@@ -29,7 +26,7 @@ void fb_write(uint8_t data) {
       break;
 
     default:
-      vga_write(data, *FB_COLOR);
+      vga_write(data, 0xcF);
   }
 }
 

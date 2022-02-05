@@ -6,6 +6,9 @@
 
 #include <stdint.h>
 
+// THis should be modified by the OS
+#define FB_STRUCT    0x50000
+
 #define FB_VIDEO_MEM VGA_VIDEO_MEM
 #define FB_RES_X     VGA_RES_X
 #define FB_RES_Y     VGA_RES_Y

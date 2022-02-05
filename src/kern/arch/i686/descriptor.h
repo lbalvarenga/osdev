@@ -65,9 +65,8 @@ typedef struct __attribute__((packed)) {
   uint16_t off_1;
 } IDT_TABLE;
 
-// Makes **entry point to next location
-void idt_entry(IDT_TABLE** entry, uint32_t isr_addr,
-                     uint16_t seg, uint8_t flags);
+void idt_entry(IDT_TABLE* entry, uint16_t offset, uint32_t isr_addr,
+               uint16_t seg, uint8_t flags);
 
 // Returns the address of the end of descriptor
 TABLE_DESC* register_idt(IDT_TABLE* offset, uint32_t idt_base);

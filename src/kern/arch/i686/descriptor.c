@@ -32,8 +32,8 @@ void setup_descriptors() {
   idt_base = (IDT_TABLE* ) ((uintptr_t) idt_base + 2);
 
   IDT_TABLE* idt = idt_base;
-  register_isrs(&idt, code_seg);
-  register_idt(idt, (uint32_t) idt_base);
+  IDT_TABLE* offset = register_isrs(idt, code_seg);
+  register_idt(offset, (uint32_t) idt_base);
 }
 
 void gdt_entry(GDT_TABLE** entry, uint32_t lim, uint32_t bas,
@@ -48,7 +48,7 @@ void gdt_entry(GDT_TABLE** entry, uint32_t lim, uint32_t bas,
 }
 
 TABLE_DESC* register_gdt(GDT_TABLE* offset, uint32_t gdt_base) {
-  uint16_t size = (uint16_t) ((uint32_t) (offset - gdt_base)) & 0xFFFF;
+  uint16_t size = (uint16_t) (((uintptr_t) offset & 0xFFFF) - (gdt_base & 0xFFFF));
   TABLE_DESC* gdt_desc = (TABLE_DESC* ) offset;
 
   gdt_desc->size   = size - 1;
@@ -58,19 +58,19 @@ TABLE_DESC* register_gdt(GDT_TABLE* offset, uint32_t gdt_base) {
   return gdt_desc + 1;
 }
 
-void idt_entry(IDT_TABLE** entry, uint32_t isr_addr,
+void idt_entry(IDT_TABLE* entry, uint16_t offset, uint32_t isr_addr,
                uint16_t seg, uint8_t flags) {
-    (*entry)->off_0    = (uint16_t) (isr_addr & 0xFFFF);
-    (*entry)->off_1    = (uint16_t) ((isr_addr >> 16) & 0xFFFF);
-    (*entry)->selector = seg;
-    (*entry)->reserved = 0;
-    (*entry)->flags    = flags;
-    (*entry)++;
+    entry += offset;
+    entry->off_0    = (uint16_t) (isr_addr & 0xFFFF);
+    entry->off_1    = (uint16_t) ((isr_addr >> 16) & 0xFFFF);
+    entry->selector = seg;
+    entry->reserved = 0;
+    entry->flags    = flags;
   }
 
 // TODO: DRY
 TABLE_DESC* register_idt(IDT_TABLE* offset, uint32_t idt_base) {
-  uint16_t size = (uint16_t) ((uint32_t) (offset - idt_base)) & 0xFFFF;
+  uint16_t size = (uint16_t) (((uintptr_t) offset & 0xFFFF) - (idt_base & 0xFFFF));
   TABLE_DESC* idt_desc = (TABLE_DESC* ) offset;
 
   idt_desc->size   = size - 1;
